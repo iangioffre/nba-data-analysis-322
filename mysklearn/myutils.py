@@ -2,6 +2,7 @@ import mysklearn.myevaluation as myevaluation
 
 import math
 import copy
+import random
 
 def compute_euclidean_distance(v1, v2):
     assert len(v1) == len(v2)
@@ -293,3 +294,25 @@ def print_decision_rules_helper(tree, class_name, attribute_names, curr_str, isN
             print_decision_rules_helper(tree[i][2], class_name, attribute_names, new_str)
     else:
         print("ERROR")
+
+def compute_bootstrapped_sample(table):
+    """Creates a bootstrapped sample from the table
+
+    Args:
+        table (list of lists): The list of the instances to be bootstrap sampled
+
+    Returns:
+        sample (list of lists): The list of the instances in the bootstrap sample
+    
+    """
+    n = len(table)
+    sample = []
+    for _ in range(n):
+        rand_index = random.randrange(0, n)
+        sample.append(table[rand_index])
+    return sample
+
+def compute_random_subset(values, num_values):
+    shuffled = values[:] # shallow copy 
+    random.shuffle(shuffled)
+    return sorted(shuffled[:num_values])

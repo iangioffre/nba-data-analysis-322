@@ -46,6 +46,8 @@ class MyDecisionTreeClassifier:
         train = [X_train[i] + [y_train[i]] for i in range(len(X_train))]
         available_attributes = header.copy()
         self.tree = myutils.tdidt_fit(train, available_attributes, header, attribute_domains)
+        # TODO: pass a subset of the available_attributes (in tdidt_fit()) at each node
+        #       using myutils.compute_random_subset(header, F) where F > 2
         
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
@@ -88,10 +90,9 @@ class MyRandomForestClassfier:
                 The shape of X_train is (n_train_samples, n_features)
         y_train(list of obj): The target y values (parallel to X_train). 
             The shape of y_train is n_samples
-        tree(nested list): The extracted tree model.
+        trees(list of nested list): The list of the M best decision tree classifiers
 
     Notes:
-        Loosely based on sklearn's DecisionTreeClassifier: https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html
         Terminology: instance = sample = row and attribute = feature = column
     """
     def __init__(self):
@@ -101,7 +102,7 @@ class MyRandomForestClassfier:
         # TODO: add necessary attributes
         self.X_train = None 
         self.y_train = None
-        self.tree = None
+        self.trees = None
 
     def fit(self, X_train, y_train):
         """Fits a decision tree classifier to X_train and y_train using the TDIDT (top down induction of decision tree) algorithm.
@@ -121,6 +122,17 @@ class MyRandomForestClassfier:
             Store the tree in the tree attribute.
             Use attribute indexes to construct default attribute names (e.g. "att0", "att1", ...).
         """
+        train = [X_train[i] + [y_train[i]] for i in range(len(X_train))]
+        # split data into training set and validation set
+        # get bootstrapped sample of training set and train a decision tree, append to list of trees (not self.trees)
+        # test the decision trees on the validation set and sort by accuracy
+        # take the M best decision trees and put into self.trees (self.trees = trees[0:M] where trees is sorted best to worst accuracy)
+
+        # a more RAM sensitive approach:
+        # keep len(trees) at M best trees and check each time if the accuracy of the new tree is better than the least accurate tree in trees
+        # if better, replace the least accurate tree with the new tree
+        # (to do this, sorting of parallel lists is necessary - myutils.sort_parallel_lists(accuracies, trees))
+
         pass # TODO: implement fit
         
     def predict(self, X_test):
