@@ -46,7 +46,7 @@ class MyDecisionTreeClassifier:
         train = [X_train[i] + [y_train[i]] for i in range(len(X_train))]
         available_attributes = header.copy()
         self.tree = myutils.tdidt_fit(train, available_attributes, header, attribute_domains)
-        # TODO: pass a subset of the available_attributes (in tdidt_fit()) at each node
+        # TODO: (for random forest) pass a subset of the available_attributes (in tdidt_fit()) at each node
         #       using myutils.compute_random_subset(header, F) where F > 2
         
     def predict(self, X_test):
