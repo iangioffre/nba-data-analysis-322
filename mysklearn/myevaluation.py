@@ -152,8 +152,9 @@ def confusion_matrix(y_true, y_pred, labels):
     """
     matrix = [[0 for _ in range(len(labels))] for _ in range(len(labels))]
     for index, y in enumerate(y_true):
-        i = labels.index(y)
-        j = labels.index(y_pred[index])
-        matrix[i][j] += 1
+        if y_pred[index] is not None:
+            i = labels.index(y)
+            j = labels.index(y_pred[index])
+            matrix[i][j] += 1
 
     return matrix

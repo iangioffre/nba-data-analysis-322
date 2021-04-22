@@ -1,5 +1,113 @@
 import mysklearn.myutils as myutils
 import copy
+import operator
+
+class MyKNeighborsClassifier:
+    """Represents a simple k nearest neighbors classifier.
+
+    Attributes:
+        n_neighbors(int): number of k neighbors
+        X_train(list of list of numeric vals): The list of training instances (samples). 
+                The shape of X_train is (n_train_samples, n_features)
+        y_train(list of obj): The target y values (parallel to X_train). 
+            The shape of y_train is n_samples
+
+    Notes:
+        Loosely based on sklearn's KNeighborsClassifier: https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
+        Terminology: instance = sample = row and attribute = feature = column
+        Assumes data has been properly normalized before use.
+    """
+    def __init__(self, n_neighbors=3):
+        """Initializer for MyKNeighborsClassifier.
+
+        Args:
+            n_neighbors(int): number of k neighbors
+        """
+        self.n_neighbors = n_neighbors
+        self.X_train = None 
+        self.y_train = None
+
+    def fit(self, X_train, y_train):
+        """Fits a kNN classifier to X_train and y_train.
+
+        Args:
+            X_train(list of list of numeric vals): The list of training instances (samples). 
+                The shape of X_train is (n_train_samples, n_features)
+            y_train(list of obj): The target y values (parallel to X_train)
+                The shape of y_train is n_train_samples
+
+        Notes:
+            Since kNN is a lazy learning algorithm, this method just stores X_train and y_train
+        """
+        self.X_train = X_train 
+        self.y_train = y_train 
+
+    def kneighbors(self, X_test):
+        """Determines the k closes neighbors of each test instance.
+
+        Args:
+            X_test(list of list of numeric vals): The list of testing samples
+                The shape of X_test is (n_test_samples, n_features)
+
+        Returns:
+            distances(list of list of float): 2D list of k nearest neighbor distances 
+                for each instance in X_test
+            neighbor_indices(list of list of int): 2D list of k nearest neighbor
+                indices in X_train (parallel to distances)
+        """
+        distances = []
+        neighbor_indices = []
+        for x_test in X_test:
+            x_train = copy.deepcopy(self.X_train)
+            for i, instance in enumerate(x_train):
+                # append the class label
+                instance.append(self.y_train[i])
+                # append the original row index
+                instance.append(i)
+                # append the distance to [2, 3]
+                dist = myutils.compute_euclidean_distance(instance[:len(x_test)], x_test)
+                instance.append(dist)
+            # [...data, classification, original index, distance]
+
+            train_sorted = sorted(x_train, key=operator.itemgetter(-1))
+            top_k = train_sorted[:self.n_neighbors]
+
+            instance_distances = []
+            instance_neighbor_indices = []
+            for row in top_k:
+                instance_distances.append(row[-1])
+                instance_neighbor_indices.append(row[-2])
+            distances.append(instance_distances)
+            neighbor_indices.append(instance_neighbor_indices)
+        
+        return distances, neighbor_indices
+
+    def predict(self, X_test):
+        """Makes predictions for test instances in X_test.
+
+        Args:
+            X_test(list of list of numeric vals): The list of testing samples
+                The shape of X_test is (n_test_samples, n_features)
+                
+        Returns:
+            y_predicted(list of obj): The predicted target y values (parallel to X_test)
+        """
+        y_predicted = []
+        _, neighbor_indices = self.kneighbors(X_test)
+        for indices in neighbor_indices:
+            classifications = []
+            counts = []
+            for index in indices:
+                classification = self.y_train[index]
+                if classification not in classifications:
+                    classifications.append(classification)
+                    counts.append(1)
+                else:
+                    counts[classifications.index(classification)] += 1
+            prediction = classifications[counts.index(max(counts))]
+            y_predicted.append(prediction)
+        
+        return y_predicted
 
 class MyDecisionTreeClassifier:
     """Represents a decision tree classifier.

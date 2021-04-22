@@ -1,4 +1,5 @@
 import mysklearn.myevaluation as myevaluation
+import matplotlib.pyplot as plt
 
 import math
 import copy
@@ -104,6 +105,71 @@ def transform_mpg(value):
         return 9
     else:
         return 10
+    
+def transform_salary(value):
+    if value <= 100000:
+        return 1
+    elif value < 1000000:
+        return 2
+    elif value < 5000000:
+        return 3
+    elif value < 10000000:
+        return 4
+    else:
+        return 5
+
+def sort_frequencies(values, frequencies):
+    zipped = list(zip(values, frequencies))
+    zipped.sort()
+    sorted_values = [value for (value, frequency) in zipped]
+    sorted_frequencies = [frequency for (value, frequency) in zipped]
+    
+    return sorted_values, sorted_frequencies
+
+def get_frequencies(table, attribute):
+    """This will return parallel lists for the values in the attribute column of table
+    
+    Args:
+        table(MyPyTable): Table to find the frequency of attributes for
+        attribute(str): attribute(column) to have frequency calculated for
+        
+    Returns:
+        (list of str): the list of the unique values in attribute column of table
+        (list of int): the parallel list of the number of games per value
+        
+    """
+    values = []
+    frequencies = []
+    column = table.get_column(attribute, False)
+    for value in column:
+        if attribute == "Year" or attribute == "model year" or value == 2600.0:
+            value = str(int(value))
+        else:
+            value = str(value)
+        if value not in values:
+            values.append(value)
+            frequencies.append(1)
+        else:
+            index = values.index(value)
+            frequencies[index] += 1
+            
+    sorted_values, sorted_frequencies = sort_frequencies(values, frequencies)
+    return sorted_values, sorted_frequencies
+
+def show_frequencies(table=None, attribute=None, vals=None, freqs=None):
+    if table and attribute:
+        values, frequencies = get_frequencies(table, attribute)
+    if vals and freqs:
+        values = vals
+        frequencies = freqs
+    plt.figure(figsize=(20, 8))
+    plt.bar(values, frequencies)
+    plt.xticks(values, values, rotation=45, horizontalalignment="right")
+    plt.grid()
+    plt.title("Frequencies of {}".format(attribute))
+    plt.xlabel(attribute)
+    plt.ylabel("Frequency")
+    plt.show()
     
 def calculate_accuracy(matrix):
     total = 0
