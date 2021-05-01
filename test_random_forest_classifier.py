@@ -100,10 +100,14 @@ def test_random_forest_classifier_predict():
     X = [row[:-1] for row in interview_table]
     y = [row[-1] for row in interview_table]
     X_remainder, X_test, y_remainder, y_test = train_test_split(X, y)
-    rf_classifier = MyRandomForestClassfier()
-    rf_classifier.fit(X_remainder, y_remainder)
-    y_predicted = rf_classifier.predict(X_test)
-    assert len(y_predicted) == len(y_test)
+    rf_classifier_7 = MyRandomForestClassfier()
+    rf_classifier_7.fit(X_remainder, y_remainder)
+    rf_classifier_10 = MyRandomForestClassfier()
+    rf_classifier_10.fit(X_remainder, y_remainder, M=10)
+    y_predicted_7 = rf_classifier_7.predict(X_test)
+    y_predicted_10 = rf_classifier_10.predict(X_test)
+    assert len(y_predicted_7) == len(y_test)
+    assert len(y_predicted_10) == len(y_test)
 
     # bramer degrees dataset
     degrees_header = ["SoftEng", "ARIN", "HCI", "CSA", "Project", "Class"]
@@ -140,7 +144,11 @@ def test_random_forest_classifier_predict():
     X = [row[:-1] for row in degrees_table]
     y = [row[-1] for row in degrees_table]
     X_remainder, X_test, y_remainder, y_test = train_test_split(X, y)
-    rf_classifier = MyRandomForestClassfier()
-    rf_classifier.fit(X_remainder, y_remainder)
-    y_predicted = rf_classifier.predict(X_test)
-    assert len(y_predicted) == len(y_test)
+    rf_classifier_7 = MyRandomForestClassfier()
+    rf_classifier_7.fit(X_remainder, y_remainder)
+    rf_classifier_15 = MyRandomForestClassfier()
+    rf_classifier_15.fit(X_remainder, y_remainder, M=15, N=50, F=3)
+    y_predicted_7 = rf_classifier_7.predict(X_test)
+    y_predicted_15 = rf_classifier_15.predict(X_test)
+    assert len(y_predicted_7) == len(y_test)
+    assert len(y_predicted_15) == len(y_test)

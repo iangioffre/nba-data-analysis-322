@@ -190,13 +190,14 @@ class MyDecisionTreeClassifier:
 class MyRandomForestClassfier:
     """Represents a Random Forest classifier
 
-    TODO: update docstring
-
     Attributes:
         X_train(list of list of obj): The list of training instances (samples). 
                 The shape of X_train is (n_train_samples, n_features)
         y_train(list of obj): The target y values (parallel to X_train). 
             The shape of y_train is n_samples
+        N: number of learners in our initial ensemble
+        M: number of "better" learners to use from the N learners
+        F: number of attributes to make available at each node
         trees(list of nested list): The list of the M best decision tree classifiers
 
     Notes:
@@ -214,22 +215,16 @@ class MyRandomForestClassfier:
         self.trees = None
 
     def fit(self, X_train, y_train, N=20, M=7, F=2):
-        """Fits a decision tree classifier to X_train and y_train using the TDIDT (top down induction of decision tree) algorithm.
-
-        TODO: update docstring
+        """Fits a random forest classifier to X_train and y_train using the TDIDT (top down induction of decision tree) algorithm over several trees.
 
         Args:
             X_train(list of list of obj): The list of training instances (samples). 
                 The shape of X_train is (n_train_samples, n_features)
             y_train(list of obj): The target y values (parallel to X_train)
                 The shape of y_train is n_train_samples
-
-        Notes:
-            Since TDIDT is an eager learning algorithm, this method builds a decision tree model
-                from the training data.
-            Build a decision tree using the nested list representation described in class.
-            Store the tree in the tree attribute.
-            Use attribute indexes to construct default attribute names (e.g. "att0", "att1", ...).
+            N: number of learners in our initial ensemble
+            M: number of "better" learners to use from the N learners
+            F: number of attributes to make available at each node
         """
         self.X_remainder = X_train
         self.y_remainder = y_train
@@ -246,7 +241,6 @@ class MyRandomForestClassfier:
         for _ in range(N):
             sample_train, sample_test = myutils.compute_bootstrapped_sample(data)
             sample_train_X = [row[:-1] for row in sample_train]
-            sample_train_y = [row[-1] for row in sample_train]
             sample_test_X = [row[:-1] for row in sample_test]
             sample_test_y = [row[-1] for row in sample_test]
             header = ["att{}".format(i) for i in range(len(sample_train_X[0]))]
@@ -276,8 +270,6 @@ class MyRandomForestClassfier:
         
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
-
-        TODO: update docstring
 
         Args:
             X_test(list of list of obj): The list of testing samples
