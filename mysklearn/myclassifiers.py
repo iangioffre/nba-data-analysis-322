@@ -1,4 +1,5 @@
 import mysklearn.myutils as myutils
+import mysklearn.myevaluation as myevaluation
 import copy
 import operator
 
@@ -154,8 +155,6 @@ class MyDecisionTreeClassifier:
         train = [X_train[i] + [y_train[i]] for i in range(len(X_train))]
         available_attributes = header.copy()
         self.tree = myutils.tdidt_fit(train, available_attributes, header, attribute_domains)
-        # TODO: (for random forest) pass a subset of the available_attributes (in tdidt_fit()) at each node
-        #       using myutils.compute_random_subset(header, F) where F > 2
         
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
@@ -207,12 +206,14 @@ class MyRandomForestClassfier:
         """Initializer for MyRandomForestClassfier.
 
         """
-        # TODO: add necessary attributes
-        self.X_train = None 
-        self.y_train = None
+        self.X_remainder = None 
+        self.y_remainder = None
+        self.N = None
+        self.M = None
+        self.F = None
         self.trees = None
 
-    def fit(self, X_train, y_train):
+    def fit(self, X_train, y_train, N=20, M=7, F=2):
         """Fits a decision tree classifier to X_train and y_train using the TDIDT (top down induction of decision tree) algorithm.
 
         TODO: update docstring
@@ -230,18 +231,48 @@ class MyRandomForestClassfier:
             Store the tree in the tree attribute.
             Use attribute indexes to construct default attribute names (e.g. "att0", "att1", ...).
         """
-        train = [X_train[i] + [y_train[i]] for i in range(len(X_train))]
-        # split data into training set and validation set
+        self.X_remainder = X_train
+        self.y_remainder = y_train
+        self.N = N
+        self.M = M
+        self.F = F
+
+        # append y to X
+        data = [X_train[i] + [y_train[i]] for i in range(len(X_train))]
+        
         # get bootstrapped sample of training set and train a decision tree, append to list of trees (not self.trees)
-        # test the decision trees on the validation set and sort by accuracy
-        # take the M best decision trees and put into self.trees (self.trees = trees[0:M] where trees is sorted best to worst accuracy)
+        tree_accuracies = []
+        candidate_trees = []
+        for _ in range(N):
+            sample_train, sample_test = myutils.compute_bootstrapped_sample(data)
+            sample_train_X = [row[:-1] for row in sample_train]
+            sample_train_y = [row[-1] for row in sample_train]
+            sample_test_X = [row[:-1] for row in sample_test]
+            sample_test_y = [row[-1] for row in sample_test]
+            header = ["att{}".format(i) for i in range(len(sample_train_X[0]))]
+            attribute_domains = myutils.get_attribute_domains(header, sample_train)
+            available_attributes = header.copy()
+            tree = myutils.tdidt_fit_rf(sample_train, available_attributes, header, attribute_domains, F)
+            
+            # test the decision tree on the validation set and sort by accuracy
+            y_predicted = []
+            for instance in sample_test_X:
+                y_predicted.append(myutils.predict_helper(tree, instance))
 
-        # a more RAM sensitive approach:
-        # keep len(trees) at M best trees and check each time if the accuracy of the new tree is better than the least accurate tree in trees
-        # if better, replace the least accurate tree with the new tree
-        # (to do this, sorting of parallel lists is necessary - myutils.sort_parallel_lists(accuracies, trees))
+            possible_classes = list(set(y_train))
+            matrix = myevaluation.confusion_matrix(sample_test_y, y_predicted, possible_classes)
+            accuracy = myutils.calculate_accuracy(matrix)
 
-        pass # TODO: implement fit
+            if len(candidate_trees) < M:
+                tree_accuracies.append(accuracy)
+                candidate_trees.append(tree)
+            elif accuracy > tree_accuracies[0]:
+                tree_accuracies[0] = accuracy
+                candidate_trees[0] = tree
+            
+            myutils.sort_parallel_lists(tree_accuracies, candidate_trees)
+            
+        self.trees = candidate_trees
         
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
@@ -255,4 +286,12 @@ class MyRandomForestClassfier:
         Returns:
             y_predicted(list of obj): The predicted target y values (parallel to X_test)
         """
-        # TODO: implement predict
+        y_predicted = []
+
+        for instance in X_test:
+            candidate_predictions = []
+            for tree in self.trees:
+                candidate_predictions.append(myutils.predict_helper(tree, instance))
+            y_predicted.append(myutils.compute_majority_vote_prediction(candidate_predictions))
+
+        return y_predicted

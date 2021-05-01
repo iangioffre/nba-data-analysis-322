@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import math
 import copy
 import random
+import numpy as np
 
 def compute_euclidean_distance(v1, v2):
     assert len(v1) == len(v2)
@@ -179,8 +180,10 @@ def calculate_accuracy(matrix):
             if i == j:
                 true_values += val
             total += val
-            
-    return true_values / total
+    
+    if total != 0:
+        return true_values / total
+    return 0
             
     
 def calculate_error_rate(matrix):
@@ -372,13 +375,105 @@ def compute_bootstrapped_sample(table):
     
     """
     n = len(table)
-    sample = []
+    sample_train = []
     for _ in range(n):
         rand_index = random.randrange(0, n)
-        sample.append(table[rand_index])
-    return sample
+        sample_train.append(table[rand_index])
+    
+    sample_test = []
+    for row in table:
+        if row not in sample_train:
+            sample_test.append(row)
+
+    return sample_train, sample_test
 
 def compute_random_subset(values, num_values):
     shuffled = values[:] # shallow copy 
     random.shuffle(shuffled)
     return sorted(shuffled[:num_values])
+
+def tdidt_fit_rf(current_instances, available_attributes, header, attribute_domains, F):
+    # basic approach (uses recursion!!):
+
+    # select F random attributes from available attributes
+    available_attributes = compute_random_subset(available_attributes, F)
+    # select an attribute to split on
+    split_attribute = select_attribute(current_instances, available_attributes)
+    # print("splitting on:", split_attribute)
+    available_attributes.remove(split_attribute)
+    # cannot split on the same attribute twice in a branch
+    # recall: python is pass by object reference!!
+    tree = ["Attribute", split_attribute]
+
+    # group data by attribute domains (creates pairwise disjoint partitions)
+    partitions = partition_instances(current_instances, split_attribute, header, attribute_domains)
+#     print("partitions:", partitions)
+
+    # for each partition, repeat unless one of the following occurs (base case)
+    for attribute_value, partition in partitions.items():
+        # print("working with partition for:", attribute_value)
+        value_subtree = ["Value", attribute_value]
+
+        # CASE 1: all class labels of the partition are the same => make a leaf node
+        if len(partition) > 0 and all_same_class(partition):
+            leaf_class = partition[0][-1]
+            denominator = sum([len(part) for _, part in partitions.items()])
+            leaf_node = ["Leaf", leaf_class, len(partition), denominator]
+            value_subtree.append(leaf_node)
+
+        # CASE 2: no more attributes to select (clash) => handle clash w/majority vote leaf node
+        elif (len(partition) > 0 and len(available_attributes) == 0):
+            vals = []
+            val_counts = []
+            denominator = 0
+            for row in partition:
+                val = row[-1]
+                if val not in vals:
+                    vals.append(val)
+                    val_counts.append(0)
+                val_counts[vals.index(val)] += 1
+                denominator += 1
+            max_val = max(val_counts)
+            max_class = vals[val_counts.index(max_val)]
+            leaf_node = ["Leaf", max_class, max_val, denominator]
+            value_subtree.append(leaf_node)
+
+        # CASE 3: no more instances to partition (empty partition) => backtrack and replace attribute node with majority vote leaf node
+        elif len(partition) == 0:
+            return None
+
+        else: # all base cases are false... recurse!!
+            subtree = tdidt_fit_rf(partition, available_attributes.copy(), header, attribute_domains, F)
+            if subtree is not None:
+                value_subtree.append(subtree)
+            else:
+                vals = []
+                val_counts = []
+                denominator = 0
+                for row in partition:
+                    val = row[-1]
+                    if val not in vals:
+                        vals.append(val)
+                        val_counts.append(0)
+                    val_counts[vals.index(val)] += 1
+                    denominator += 1
+                max_val = max(val_counts)
+                max_class = vals[val_counts.index(max_val)]
+                leaf_node = ["Leaf", max_class, max_val, denominator]
+                value_subtree.append(leaf_node)
+        
+        tree.append(value_subtree)
+    
+    return tree
+
+def compute_majority_vote_prediction(predictions):
+    candidates = []
+    candidate_counts = []
+    for prediction in predictions:
+        if prediction in candidates:
+            candidate_counts[candidates.index(prediction)]
+        else:
+            candidates.append(prediction)
+            candidate_counts.append(1)
+
+    return candidates[candidate_counts.index(max(candidate_counts))]
