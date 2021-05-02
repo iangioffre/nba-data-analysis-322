@@ -158,3 +158,29 @@ def confusion_matrix(y_true, y_pred, labels):
             matrix[i][j] += 1
 
     return matrix
+
+def tune_parameters(N_range, M_range, F_range, table):
+    max_percentage = 0
+    max_parameters = [0, 0, 0]
+    for N in range(N_range[0], N_range[1]):
+        for M in range(M_range[0], M_range[1]):
+            for F in range(F_range[0], F_range[1]):
+                percentages = []
+                for _ in range(10):
+                    X = [row[:-1] for row in table]
+                    y = [row[-1] for row in table]
+                    X_remainder, X_test, y_remainder, y_test = train_test_split(X, y)
+                    rf_classifier = MyRandomForestClassifier()
+                    rf_classifier.fit(X_remainder, y_remainder, N=100, M=10, F=4)
+                    y_predicted = rf_classifier.predict(X_test)
+                    correct = 0
+                    for i, y in enumerate(y_test):
+                        if y == y_predicted[i]:
+                            correct += 1
+                    percentage_correct = correct / len(y_test) * 100
+                    percentages.append(percentage_correct)
+                total_percentage = sum(percentages) / len(percentages)
+                if total_percentage > max_percentage:
+                    max_percentage = total_percentage
+                    max_parameters = [N, M, F]
+    print("N = {}, M = {}, F = {}: {}% Correct".format(max_parameters[0], max_parameters[1], max_parameters[2], max_percentage))

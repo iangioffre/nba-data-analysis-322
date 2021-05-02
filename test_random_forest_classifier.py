@@ -1,4 +1,4 @@
-from mysklearn.myclassifiers import MyRandomForestClassfier
+from mysklearn.myclassifiers import MyRandomForestClassifier
 from mysklearn.myevaluation import train_test_split
 
 def test_random_forest_classifier_fit():
@@ -25,9 +25,9 @@ def test_random_forest_classifier_fit():
     X = [row[:-1] for row in interview_table]
     y = [row[-1] for row in interview_table]
     X_remainder, X_test, y_remainder, y_test = train_test_split(X, y)
-    rf_classifier_7 = MyRandomForestClassfier()
+    rf_classifier_7 = MyRandomForestClassifier()
     rf_classifier_7.fit(X_remainder, y_remainder)
-    rf_classifier_10 = MyRandomForestClassfier()
+    rf_classifier_10 = MyRandomForestClassifier()
     rf_classifier_10.fit(X_remainder, y_remainder, M=10)
 
     assert len(rf_classifier_7.trees) == 7 # default M = 7
@@ -68,9 +68,9 @@ def test_random_forest_classifier_fit():
     X = [row[:-1] for row in degrees_table]
     y = [row[-1] for row in degrees_table]
     X_remainder, X_test, y_remainder, y_test = train_test_split(X, y)
-    rf_classifier_7 = MyRandomForestClassfier()
+    rf_classifier_7 = MyRandomForestClassifier()
     rf_classifier_7.fit(X_remainder, y_remainder)
-    rf_classifier_15 = MyRandomForestClassfier()
+    rf_classifier_15 = MyRandomForestClassifier()
     rf_classifier_15.fit(X_remainder, y_remainder, M=15, N=50, F=3)
 
     assert len(rf_classifier_7.trees) == 7 # default M = 7
@@ -100,14 +100,18 @@ def test_random_forest_classifier_predict():
     X = [row[:-1] for row in interview_table]
     y = [row[-1] for row in interview_table]
     X_remainder, X_test, y_remainder, y_test = train_test_split(X, y)
-    rf_classifier_7 = MyRandomForestClassfier()
+    rf_classifier_7 = MyRandomForestClassifier()
     rf_classifier_7.fit(X_remainder, y_remainder)
-    rf_classifier_10 = MyRandomForestClassfier()
+    rf_classifier_10 = MyRandomForestClassifier()
     rf_classifier_10.fit(X_remainder, y_remainder, M=10)
+    rf_classifier_tuned = MyRandomForestClassifier()
+    rf_classifier_tuned.fit(X_remainder, y_remainder, N=96, M=16, F=4)
     y_predicted_7 = rf_classifier_7.predict(X_test)
     y_predicted_10 = rf_classifier_10.predict(X_test)
+    y_predicted_tuned = rf_classifier_tuned.predict(X_test)
     assert len(y_predicted_7) == len(y_test)
     assert len(y_predicted_10) == len(y_test)
+    assert len(y_predicted_tuned) == len(y_test)
 
     # bramer degrees dataset
     degrees_header = ["SoftEng", "ARIN", "HCI", "CSA", "Project", "Class"]
@@ -144,11 +148,15 @@ def test_random_forest_classifier_predict():
     X = [row[:-1] for row in degrees_table]
     y = [row[-1] for row in degrees_table]
     X_remainder, X_test, y_remainder, y_test = train_test_split(X, y)
-    rf_classifier_7 = MyRandomForestClassfier()
+    rf_classifier_7 = MyRandomForestClassifier()
     rf_classifier_7.fit(X_remainder, y_remainder)
-    rf_classifier_15 = MyRandomForestClassfier()
+    rf_classifier_15 = MyRandomForestClassifier()
     rf_classifier_15.fit(X_remainder, y_remainder, M=15, N=50, F=3)
+    rf_classifier_tuned = MyRandomForestClassifier()
+    rf_classifier_tuned.fit(X_remainder, y_remainder, N=96, M=16, F=4)
     y_predicted_7 = rf_classifier_7.predict(X_test)
     y_predicted_15 = rf_classifier_15.predict(X_test)
+    y_predicted_tuned = rf_classifier_tuned.predict(X_test)
     assert len(y_predicted_7) == len(y_test)
     assert len(y_predicted_15) == len(y_test)
+    assert len(y_predicted_tuned) == len(y_test)

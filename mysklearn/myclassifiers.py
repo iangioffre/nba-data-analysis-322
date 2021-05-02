@@ -187,7 +187,7 @@ class MyDecisionTreeClassifier:
 
         myutils.print_decision_rules_helper(self.tree, class_name, attribute_names, "IF", isNotRoot=False)
 
-class MyRandomForestClassfier:
+class MyRandomForestClassifier:
     """Represents a Random Forest classifier
 
     Attributes:
@@ -204,7 +204,7 @@ class MyRandomForestClassfier:
         Terminology: instance = sample = row and attribute = feature = column
     """
     def __init__(self):
-        """Initializer for MyRandomForestClassfier.
+        """Initializer for MyRandomForestClassifier.
 
         """
         self.X_remainder = None 
