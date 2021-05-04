@@ -3,6 +3,7 @@ import mysklearn.myevaluation as myevaluation
 import copy
 import operator
 
+
 class MyKNeighborsClassifier:
     """Represents a simple k nearest neighbors classifier.
 
@@ -18,6 +19,7 @@ class MyKNeighborsClassifier:
         Terminology: instance = sample = row and attribute = feature = column
         Assumes data has been properly normalized before use.
     """
+
     def __init__(self, n_neighbors=3):
         """Initializer for MyKNeighborsClassifier.
 
@@ -25,7 +27,7 @@ class MyKNeighborsClassifier:
             n_neighbors(int): number of k neighbors
         """
         self.n_neighbors = n_neighbors
-        self.X_train = None 
+        self.X_train = None
         self.y_train = None
 
     def fit(self, X_train, y_train):
@@ -40,8 +42,8 @@ class MyKNeighborsClassifier:
         Notes:
             Since kNN is a lazy learning algorithm, this method just stores X_train and y_train
         """
-        self.X_train = X_train 
-        self.y_train = y_train 
+        self.X_train = X_train
+        self.y_train = y_train
 
     def kneighbors(self, X_test):
         """Determines the k closes neighbors of each test instance.
@@ -66,7 +68,8 @@ class MyKNeighborsClassifier:
                 # append the original row index
                 instance.append(i)
                 # append the distance to [2, 3]
-                dist = myutils.compute_euclidean_distance(instance[:len(x_test)], x_test)
+                dist = myutils.compute_euclidean_distance(
+                    instance[:len(x_test)], x_test)
                 instance.append(dist)
             # [...data, classification, original index, distance]
 
@@ -80,7 +83,7 @@ class MyKNeighborsClassifier:
                 instance_neighbor_indices.append(row[-2])
             distances.append(instance_distances)
             neighbor_indices.append(instance_neighbor_indices)
-        
+
         return distances, neighbor_indices
 
     def predict(self, X_test):
@@ -89,7 +92,7 @@ class MyKNeighborsClassifier:
         Args:
             X_test(list of list of numeric vals): The list of testing samples
                 The shape of X_test is (n_test_samples, n_features)
-                
+
         Returns:
             y_predicted(list of obj): The predicted target y values (parallel to X_test)
         """
@@ -107,8 +110,53 @@ class MyKNeighborsClassifier:
                     counts[classifications.index(classification)] += 1
             prediction = classifications[counts.index(max(counts))]
             y_predicted.append(prediction)
-        
+
         return y_predicted
+
+
+class MyZeroRClassifier:
+    """Represents a Zero-R classifier.
+    Attributes:
+        prediction(obj): the most common class that everything will be predicted as
+    """
+
+    def __init__(self):
+        """Initializer for MyZeroRClassifier.
+        """
+        self.prediction = None
+
+    def fit(self, X_train, y_train):
+        """Fits a Zero-R classifier to X_train and y_train.
+        Args:
+            X_train(list of list of obj): The list of training instances (samples). 
+                The shape of X_train is (n_train_samples, n_features)
+            y_train(list of obj): The target y values (parallel to X_train)
+                The shape of y_train is n_train_samples
+        """
+        classifications = []
+        classification_counts = []
+        for classification in y_train:
+            if classification not in classifications:
+                classifications.append(classification)
+                classification_counts.append(0)
+            else:
+                index = classifications.index(classification)
+                classification_counts[index] += 1
+
+        max_index = classification_counts.index(max(classification_counts))
+        self.prediction = classifications[max_index]
+
+    def predict(self, X_test):
+        """Makes predictions for test instances in X_test.
+        Args:
+            X_test(list of list of obj): The list of testing samples
+                The shape of X_test is (n_test_samples, n_features)
+        Returns:
+            y_predicted(list of obj): The predicted target y values (parallel to X_test)
+        """
+        y_predicted = [self.prediction for _ in X_test]
+        return y_predicted
+
 
 class MyDecisionTreeClassifier:
     """Represents a decision tree classifier.
@@ -124,11 +172,12 @@ class MyDecisionTreeClassifier:
         Loosely based on sklearn's DecisionTreeClassifier: https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html
         Terminology: instance = sample = row and attribute = feature = column
     """
+
     def __init__(self):
         """Initializer for MyDecisionTreeClassifier.
 
         """
-        self.X_train = None 
+        self.X_train = None
         self.y_train = None
         self.tree = None
 
@@ -154,8 +203,9 @@ class MyDecisionTreeClassifier:
         attribute_domains = myutils.get_attribute_domains(header, X_train)
         train = [X_train[i] + [y_train[i]] for i in range(len(X_train))]
         available_attributes = header.copy()
-        self.tree = myutils.tdidt_fit(train, available_attributes, header, attribute_domains)
-        
+        self.tree = myutils.tdidt_fit(
+            train, available_attributes, header, attribute_domains)
+
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
 
@@ -183,9 +233,12 @@ class MyDecisionTreeClassifier:
                 ("class" if a string is not provided and the default name "class" should be used).
         """
         if attribute_names is None:
-            attribute_names = ["att{}".format(i) for i in range(len(self.X_train[0]))]
+            attribute_names = ["att{}".format(i)
+                               for i in range(len(self.X_train[0]))]
 
-        myutils.print_decision_rules_helper(self.tree, class_name, attribute_names, "IF", isNotRoot=False)
+        myutils.print_decision_rules_helper(
+            self.tree, class_name, attribute_names, "IF", isNotRoot=False)
+
 
 class MyRandomForestClassifier:
     """Represents a Random Forest classifier
@@ -203,11 +256,12 @@ class MyRandomForestClassifier:
     Notes:
         Terminology: instance = sample = row and attribute = feature = column
     """
+
     def __init__(self):
         """Initializer for MyRandomForestClassifier.
 
         """
-        self.X_remainder = None 
+        self.X_remainder = None
         self.y_remainder = None
         self.N = None
         self.M = None
@@ -234,27 +288,31 @@ class MyRandomForestClassifier:
 
         # append y to X
         data = [X_train[i] + [y_train[i]] for i in range(len(X_train))]
-        
+
         # get bootstrapped sample of training set and train a decision tree, append to list of trees (not self.trees)
         tree_accuracies = []
         candidate_trees = []
         for _ in range(N):
-            sample_train, sample_test = myutils.compute_bootstrapped_sample(data)
+            sample_train, sample_test = myutils.compute_bootstrapped_sample(
+                data)
             sample_train_X = [row[:-1] for row in sample_train]
             sample_test_X = [row[:-1] for row in sample_test]
             sample_test_y = [row[-1] for row in sample_test]
             header = ["att{}".format(i) for i in range(len(sample_train_X[0]))]
-            attribute_domains = myutils.get_attribute_domains(header, sample_train)
+            attribute_domains = myutils.get_attribute_domains(
+                header, sample_train)
             available_attributes = header.copy()
-            tree = myutils.tdidt_fit_rf(sample_train, available_attributes, header, attribute_domains, F)
-            
+            tree = myutils.tdidt_fit_rf(
+                sample_train, available_attributes, header, attribute_domains, F)
+
             # test the decision tree on the validation set and sort by accuracy
             y_predicted = []
             for instance in sample_test_X:
                 y_predicted.append(myutils.predict_helper(tree, instance))
 
             possible_classes = list(set(y_train))
-            matrix = myevaluation.confusion_matrix(sample_test_y, y_predicted, possible_classes)
+            matrix = myevaluation.confusion_matrix(
+                sample_test_y, y_predicted, possible_classes)
             accuracy = myutils.calculate_accuracy(matrix)
 
             if len(candidate_trees) < M:
@@ -263,11 +321,11 @@ class MyRandomForestClassifier:
             elif accuracy > tree_accuracies[0]:
                 tree_accuracies[0] = accuracy
                 candidate_trees[0] = tree
-            
+
             myutils.sort_parallel_lists(tree_accuracies, candidate_trees)
-            
+
         self.trees = candidate_trees
-        
+
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
 
@@ -283,7 +341,9 @@ class MyRandomForestClassifier:
         for instance in X_test:
             candidate_predictions = []
             for tree in self.trees:
-                candidate_predictions.append(myutils.predict_helper(tree, instance))
-            y_predicted.append(myutils.compute_majority_vote_prediction(candidate_predictions))
+                candidate_predictions.append(
+                    myutils.predict_helper(tree, instance))
+            y_predicted.append(
+                myutils.compute_majority_vote_prediction(candidate_predictions))
 
         return y_predicted

@@ -119,6 +119,15 @@ def transform_salary(value):
     else:
         return 5
 
+def transform_player_weight(value):
+    base = 150
+    jump = 30
+    # 6 weight classes
+    for i in range(1, 5):
+        if value <= base + i * jump:
+            return i
+    return 5
+
 def sort_frequencies(values, frequencies):
     zipped = list(zip(values, frequencies))
     zipped.sort()
