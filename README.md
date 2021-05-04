@@ -12,7 +12,7 @@ The salary classes are as follows:
 1. < 1,000,000
 1. < 5,000,000
 1. < 10,000,000
-1. >= 10,000,000
+1. />= 10,000,000
 
 The predictor can be used with the following url:  
 http://TODO/predict?year_start=[year_start]&height=[height]&weight_class=[weight_class]&position=[position]  
