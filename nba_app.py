@@ -60,16 +60,16 @@ def predict_salary_class(instance):
     infile = open("forest.p", "rb")
     header, forest = pickle.load(infile)
     infile.close()
-    print("header:", header)
+    # print("header:", header)
     # print("forest:", forest)
 
     # use the forest to make a prediction
     try:
         prediction = rf_predict(header, forest, instance)
-        print("Prediction:", prediction)
+        # print("Prediction:", prediction)
         return prediction  # recursive function
     except:
-        print("EXCEPTION: return none")
+        # print("EXCEPTION: return none")
         return None
 
 
