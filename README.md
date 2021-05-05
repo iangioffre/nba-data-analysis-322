@@ -26,9 +26,9 @@ To run the Random Forest Classifier tests: `python scripts/test_random_forest_cl
 To fit a new forest to the dataset and pickle it into `forest.p`: `python scripts/forest_pickler.py`  
 
 ## Project Organization
-/input_data: contains the input data for the classifiers and scripts
-/mysklearn: contains files for the classifiers and other supporting utility methods
-/notebooks: contains notebooks for the project (not including the technical report)
-/output_data: contains the output from the join on the datasets retrieved from kaggle.com
-/scripts: contains scripts that are helpful for development and testing
+/input_data: contains the input data for the classifiers and scripts  
+/mysklearn: contains files for the classifiers and other supporting utility methods  
+/notebooks: contains notebooks for the project (not including the technical report)  
+/output_data: contains the output from the join on the datasets retrieved from kaggle.com  
+/scripts: contains scripts that are helpful for development and testing  
 /: contains files for Heroku deployment and the technical report
