@@ -8,11 +8,11 @@ This project implements a Random Forest Classifier to predict the salary class o
 * position: The position or positions that the athlete plays
 
 The salary classes are as follows:  
-1. <= 100,000
-1. < 1,000,000
-1. < 5,000,000
-1. < 10,000,000
-1. \>= 10,000,000
+1. &le; 100,000
+1. &lt; 1,000,000
+1. &lt; 5,000,000
+1. &lt; 10,000,000
+1. &ge; 10,000,000
 
 The predictor can be used with the following url:  
 https://nba-statistics-app-igioffre.herokuapp.com/predict?year_start=[year_start]&height=[height]&weight_class=[weight_class]&position=[position]  
