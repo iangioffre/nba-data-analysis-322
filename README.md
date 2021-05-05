@@ -4,7 +4,7 @@
 This project implements a Random Forest Classifier to predict the salary class of NBA athletes given several arguments:  
 * year_started: The year the athlete joined the NBA
 * height: The height of the athlete
-* weight_class: The weight class of the athlete (weight <= 150 + (weight_class * 30))
+* weight_class: The weight class of the athlete (weight &le; 150 + (weight_class * 30))
 * position: The position or positions that the athlete plays
 
 The salary classes are as follows:  
