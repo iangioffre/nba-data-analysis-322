@@ -6,11 +6,12 @@ import copy
 import random
 import numpy as np
 
+
 def compute_euclidean_distance(v1, v2):
     assert len(v1) == len(v2)
 
-    #dist = math.sqrt(sum([(v1[i] - v2[i]) ** 2 for i in range(len(v1))]))
-    
+    # dist = math.sqrt(sum([(v1[i] - v2[i]) ** 2 for i in range(len(v1))]))
+
     vals = []
     for i in range(len(v1)):
         if isinstance(v1[i], int) or isinstance(v1[i], float):
@@ -19,52 +20,57 @@ def compute_euclidean_distance(v1, v2):
             vals.append(0)
         else:
             vals.append(1)
-    
+
     dist = math.sqrt(sum(vals))
-    
+
     return dist
+
 
 def sort_parallel_lists(sort_list, parallel_list):
     zipped = list(zip(sort_list, parallel_list))
     zipped.sort()
     sorted_list = [value for (value, _) in zipped]
     sorted_parallel_list = [value for (_, value) in zipped]
-    
+
     return sorted_list, sorted_parallel_list
+
 
 def get_column(table, header, col_name):
     col_index = header.index(col_name)
     col = []
-    for row in table: 
+    for row in table:
         # ignore missing values ("NA" or "N/A")
         if row[col_index] != "NA" and row[col_index] != "N/A":
             col.append(row[col_index])
     return col
 
+
 def group_by(table, header, group_by_col_name):
     col = get_column(table, header, group_by_col_name)
     col_index = header.index(group_by_col_name)
-    
+
     # we need the unique values for our group by column
-    group_names = sorted(list(set(col))) # e.g. 74, 75, 76, 77
-    group_subtables = [[] for _ in group_names] # [[], [], [], []]
-    
+    group_names = sorted(list(set(col)))  # e.g. 74, 75, 76, 77
+    group_subtables = [[] for _ in group_names]  # [[], [], [], []]
+
     # algorithm: walk through each row and assign it to the appropriate
     # subtable based on its group_by_col_name value
     for row in table:
         group_by_value = row[col_index]
         # which subtable to put this row in?
         group_index = group_names.index(group_by_value)
-        group_subtables[group_index].append(row.copy()) # shallow copy
-    
+        group_subtables[group_index].append(row.copy())  # shallow copy
+
     return group_names, group_subtables
+
 
 def print_classifier_info(test_data, y_predicted, y_actual):
     # print out data
     for i, test_instance in enumerate(test_data):
         print("instance:", ", ".join([str(val) for val in test_data[i]]))
         print("class: {}, actual: {}".format(y_predicted[i], y_actual[i]))
-        
+
+
 def normalize_data(x):
     values = copy.deepcopy(x)
     max_val = max(values)
@@ -72,6 +78,7 @@ def normalize_data(x):
     for val in values:
         val = (val - min_val) / ((max_val - min_val) * 1.0)
     return values
+
 
 def transform_weight(value):
     if value <= 1999:
@@ -84,7 +91,8 @@ def transform_weight(value):
         return 4
     else:
         return 5
-    
+
+
 def transform_mpg(value):
     if value <= 13:
         return 1
@@ -106,7 +114,8 @@ def transform_mpg(value):
         return 9
     else:
         return 10
-    
+
+
 def transform_salary(value):
     if value <= 100000:
         return 1
@@ -119,6 +128,7 @@ def transform_salary(value):
     else:
         return 5
 
+
 def transform_player_weight(value):
     base = 150
     jump = 30
@@ -128,25 +138,27 @@ def transform_player_weight(value):
             return i
     return 5
 
+
 def sort_frequencies(values, frequencies):
     zipped = list(zip(values, frequencies))
     zipped.sort()
     sorted_values = [value for (value, frequency) in zipped]
     sorted_frequencies = [frequency for (value, frequency) in zipped]
-    
+
     return sorted_values, sorted_frequencies
+
 
 def get_frequencies(table, attribute):
     """This will return parallel lists for the values in the attribute column of table
-    
+
     Args:
         table(MyPyTable): Table to find the frequency of attributes for
         attribute(str): attribute(column) to have frequency calculated for
-        
+
     Returns:
         (list of str): the list of the unique values in attribute column of table
         (list of int): the parallel list of the number of games per value
-        
+
     """
     values = []
     frequencies = []
@@ -162,9 +174,10 @@ def get_frequencies(table, attribute):
         else:
             index = values.index(value)
             frequencies[index] += 1
-            
+
     sorted_values, sorted_frequencies = sort_frequencies(values, frequencies)
     return sorted_values, sorted_frequencies
+
 
 def show_frequencies(table=None, attribute=None, vals=None, freqs=None):
     if table and attribute:
@@ -180,7 +193,8 @@ def show_frequencies(table=None, attribute=None, vals=None, freqs=None):
     plt.xlabel(attribute)
     plt.ylabel("Frequency")
     plt.show()
-    
+
+
 def calculate_accuracy(matrix):
     total = 0
     true_values = 0
@@ -189,14 +203,15 @@ def calculate_accuracy(matrix):
             if i == j:
                 true_values += val
             total += val
-    
+
     if total != 0:
         return true_values / total
     return 0
-            
-    
+
+
 def calculate_error_rate(matrix):
     return 1 - calculate_accuracy(matrix)
+
 
 def predict_helper(tree, instance):
     """Recursive helper for MyDecisionTreeClassifier.predict()
@@ -210,12 +225,16 @@ def predict_helper(tree, instance):
     """
     info_type = tree[0]
     if info_type == "Attribute":
-        attribute_index = int(tree[1][-1]) # last char in string which is the index of the attribute
+        # last char in string which is the index of the attribute
+        attribute_index = int(tree[1][-1])
         instance_value = instance[attribute_index]
-        
+
         for i in range(2, len(tree)):
             value_list = tree[i]
-            if value_list[1] == instance_value:
+            if isinstance(value_list[1], float):
+                if value_list[1] == float(instance_value):
+                    return predict_helper(value_list[2], instance)
+            elif value_list[1] == instance_value:
                 return predict_helper(value_list[2], instance)
     else: # leaf node
         return tree[1] # leaf class label

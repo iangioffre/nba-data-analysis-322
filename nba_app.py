@@ -52,7 +52,8 @@ def rf_predict(header, forest, instance):
         candidate = myutils.predict_helper(tree, instance)
         if candidate is not None:
             candidate_predictions.append(candidate)
-    prediction = myutils.compute_majority_vote_prediction(candidate_predictions)
+    prediction = myutils.compute_majority_vote_prediction(
+        candidate_predictions)
     return prediction
 
 
@@ -69,7 +70,6 @@ def predict_salary_class(instance):
         # print("Prediction:", prediction)
         return prediction  # recursive function
     except:
-        # print("EXCEPTION: return none")
         return None
 
 
