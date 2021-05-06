@@ -2,6 +2,7 @@ import mysklearn.myutils as myutils
 import numpy as np
 import math
 import copy
+import mysklearn.myclassifiers as myclassifiers
 
 def train_test_split(X, y, test_size=0.33, random_state=None, shuffle=True):
     """Split dataset into train and test sets (sublists) based on a test set size.
@@ -162,15 +163,15 @@ def confusion_matrix(y_true, y_pred, labels):
 def tune_parameters(N_range, M_range, F_range, table):
     max_percentage = 0
     max_parameters = [0, 0, 0]
-    for N in range(N_range[0], N_range[1]):
-        for M in range(M_range[0], M_range[1]):
+    for N in range(N_range[0], N_range[1], 10):
+        for M in range(M_range[0], M_range[1], 2):
             for F in range(F_range[0], F_range[1]):
                 percentages = []
-                for _ in range(10):
+                for _ in range(5):
                     X = [row[:-1] for row in table]
                     y = [row[-1] for row in table]
                     X_remainder, X_test, y_remainder, y_test = train_test_split(X, y)
-                    rf_classifier = MyRandomForestClassifier()
+                    rf_classifier = myclassifiers.MyRandomForestClassifier()
                     rf_classifier.fit(X_remainder, y_remainder, N=100, M=10, F=4)
                     y_predicted = rf_classifier.predict(X_test)
                     correct = 0
@@ -183,4 +184,4 @@ def tune_parameters(N_range, M_range, F_range, table):
                 if total_percentage > max_percentage:
                     max_percentage = total_percentage
                     max_parameters = [N, M, F]
-    print("N = {}, M = {}, F = {}: {}% Correct".format(max_parameters[0], max_parameters[1], max_parameters[2], max_percentage))
+    print("N = {}, M = {}, F = {}: {}% Correct".format(max_parameters[0], max_parameters[1], max_parameters[2], int(max_percentage)))
